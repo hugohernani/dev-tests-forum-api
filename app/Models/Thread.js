@@ -4,6 +4,9 @@
 const Model = use('Model')
 
 class Thread extends Model {
+  url(){
+    return `threads/${this.id}`
+  }
 }
 
 module.exports = Thread
