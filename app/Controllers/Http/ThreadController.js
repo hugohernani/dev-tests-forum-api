@@ -3,15 +3,20 @@
 const Thread = use('App/Models/Thread')
 
 class ThreadController {
-  async store({request, response}){
-    const thread = await Thread.create(request.only(['title', 'body']))
+  async store({request, response, auth}){
+    const thread = await auth.user.threads().create(request.only(['title', 'body']))
     return response.json({thread})
   }
 
-  async destroy({params}){
+  async update({params, request, response, auth}){
     const thread = await Thread.findOrFail(params.id)
+    thread.merge(request.only(['title', 'body']))
+    await thread.save()
+    return response.json({thread})
+  }
 
-    await thread.delete()
+  async destroy({params, response, auth}){
+    await Thread.query().where('id', params.id).delete()
   }
 }
 

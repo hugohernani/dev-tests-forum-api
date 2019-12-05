@@ -9,7 +9,16 @@ class ThreadSchema extends Schema {
       table.increments()
       table.string('title')
       table.text('body')
+      table
+        .integer('user_id')
+        .unsigned()
+        .notNullable()
       table.timestamps()
+
+      table
+        .foreign('user_id')
+        .references('id')
+        .inTable('users')
     })
   }
 
