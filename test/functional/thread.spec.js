@@ -98,9 +98,18 @@ test('unauthenticated user cannot update threads', async ({ assert, client }) =>
 test('thread cannot be updated by an user who did not created it', async({client}) => {
   const thread = await Factory.model('App/Models/Thread').create()
   const notOwner = await Factory.model('App/Models/User').create()
-  const response = await client.put(thread.url()).send().loginVia(notOwner).end()
+  const response = await client.put(thread.url()).loginVia(notOwner).send().end()
 
   response.assertStatus(403)
+})
+
+test('moderator can modify threads', async ({assert, client}) => {
+  const moderator = await Factory.model('App/Models/User').create({type: 1})
+  const thread = await Factory.model('App/Models/Thread').create()
+  const attributes = { title: 'new title', body: 'new body' }
+
+  const response = await client.put(thread.url()).loginVia(moderator).send(attributes).end()
+  response.assertStatus(200)
 })
 
 
@@ -126,4 +135,12 @@ test('thread can not be deleted by a user who did not create it', async ({ clien
   const notOwner = await Factory.model('App/Models/User').create()
   const response = await client.delete(thread.url()).send().loginVia(notOwner).end()
   response.assertStatus(403)
+})
+
+test('moderator can delete threads', async ({assert, client}) => {
+  const moderator = await Factory.model('App/Models/User').create({type: 1})
+  const thread = await Factory.model('App/Models/Thread').create()
+  const response = await client.delete(thread.url()).send().loginVia(moderator).end()
+  response.assertStatus(204)
+  assert.equal(await Thread.getCount(), 0)
 })
